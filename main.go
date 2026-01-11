@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	Version = "0.0.1"
+	Version = "0.0.3"
 )
 
 func main() {
@@ -31,6 +31,7 @@ func main() {
 		ServerURL: *serverURL,
 		Token:     *token,
 		ServerID:  *serverID,
+		Version:   Version,
 	}
 	agent := client.NewAgentClient(cfg)
 

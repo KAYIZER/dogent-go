@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/KAYIZER/dogent-go/executor"
+	"github.com/KAYIZER/dogent-go/updater"
 	"github.com/gorilla/websocket"
 )
 
@@ -17,6 +18,7 @@ type Config struct {
 	ServerURL string
 	Token     string
 	ServerID  string
+	Version   string
 }
 
 type AgentClient struct {
@@ -71,6 +73,7 @@ func (c *AgentClient) Connect() {
 		authMsg := map[string]string{
 			"token":     c.config.Token,
 			"server_id": c.config.ServerID,
+			"version":   c.config.Version,
 		}
 		if err := c.conn.WriteJSON(authMsg); err != nil {
 			log.Println("Authentication write failed:", err)
@@ -117,6 +120,15 @@ func (c *AgentClient) handleMessage(msg map[string]interface{}) {
 		log.Printf("ℹ️ Status: %v", msg["content"])
 	case "pong":
 		// Heartbeat ack, ignore
+	case "upgrade":
+		log.Println("⚡ Upgrade command received. Starting update process...")
+		c.conn.WriteJSON(map[string]string{"type": "status", "content": "Upgrading agent..."})
+
+		if err := updater.UpdateAgent(c.config.Version); err != nil {
+			log.Printf("❌ Update failed: %v", err)
+			c.conn.WriteJSON(map[string]string{"type": "error", "content": fmt.Sprintf("Update failed: %v", err)})
+		}
+
 	case "command":
 		cmdContent, _ := msg["content"].(string)
 		log.Printf("📢 Received Command: %s", cmdContent)
