@@ -41,16 +41,28 @@ func (c *AgentClient) Connect() {
 		log.Fatal("Invalid URL:", err)
 	}
 
+	retryDelay := 1 * time.Second
+	maxDelay := 60 * time.Second
+
 	for {
 		log.Printf("🔌 Connecting to %s...", u.String())
 
 		// Connect
 		conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 		if err != nil {
-			log.Printf("❌ Connection failed: %v. Retrying in 5 seconds...", err)
-			time.Sleep(5 * time.Second)
+			log.Printf("❌ Connection failed: %v. Retrying in %v...", err, retryDelay)
+			time.Sleep(retryDelay)
+
+			// Exponential Backoff
+			retryDelay *= 2
+			if retryDelay > maxDelay {
+				retryDelay = maxDelay
+			}
 			continue
 		}
+
+		// Reset delay on success
+		retryDelay = 1 * time.Second
 
 		c.conn = conn
 		log.Println("✅ Connected!")
