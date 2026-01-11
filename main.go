@@ -37,7 +37,7 @@ func main() {
 
 	// 3. Start Stats Loop (Heartbeat)
 	go func() {
-		ticker := time.NewTicker(5 * time.Second)
+		ticker := time.NewTicker(30 * time.Second)
 		defer ticker.Stop()
 
 		for range ticker.C {
