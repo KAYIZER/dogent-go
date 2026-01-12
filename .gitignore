@@ -1,0 +1,17 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+dogent-agent
+
+# Logs
+*.log
+
+# Temp
+tmp/
+dist/
+
+# IDEs
+.vscode/
+.idea/
